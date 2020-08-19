@@ -38,14 +38,14 @@ public class LibraryPortTest extends TestFields {
 
     @Test(groups = "negative", description = "create author with id that exists")
     public void createNewAuthorWithExistingId() {
+        AuthorType author;
+        randomID = IdChecker.getPresentAuthorId();
+        AuthorType authorType = RandomEntityGenerator.getTestAuthorEntity(randomID);
+        CreateAuthorRequest request = new CreateAuthorRequest();
+        request.setAuthor(authorType);
+        CreateAuthorResponse response = service.createAuthor(request);
         try {
-            randomID = IdChecker.getPresentAuthorId();
-            AuthorType authorType = RandomEntityGenerator.getRandomAuthor(randomID);
-
-            CreateAuthorRequest request = new CreateAuthorRequest();
-            request.setAuthor(authorType);
-            CreateAuthorResponse response = service.createAuthor(request);
-            AuthorType author = response.getAuthor();
+            author = response.getAuthor();
             Assert.assertNotEquals(author.getAuthorId(), randomID, "Posted Id is equal");
             Assert.assertNotEquals(author.getAuthorName().getFirst(), authorType.getAuthorName().getFirst(),
                     "Posted FirstName is equal");
@@ -61,34 +61,17 @@ public class LibraryPortTest extends TestFields {
         DeleteAuthorRequest request = new DeleteAuthorRequest();
         request.setAuthorId(randomID);
         int sizeAfterDelete = ListSizeGetter.getAuthorListSize();
-
         Assert.assertEquals(sizeBeforeDelete, sizeAfterDelete - 1, "You're deleting not existed genreId");
     }
 
     @Test(groups = "negative", description = "update author with id that does not exist")
     public void updateExistingGenre() {
-        try {
-            randomID = IdChecker.getAbsentAuthorId();
-            GetAuthorRequest beforeUpdateRequest = new GetAuthorRequest();
-            beforeUpdateRequest.setAuthorId(randomID);
-            GetAuthorResponse beforeUpdateResponse = service.getAuthor(beforeUpdateRequest);
-            AuthorType beforeUpdate = beforeUpdateResponse.getAuthor();
-
-            AuthorType randomAuthor = RandomEntityGenerator.getRandomAuthor(randomID);
-            UpdateAuthorRequest afterUpdateRequest = new UpdateAuthorRequest();
-            afterUpdateRequest.setAuthor(randomAuthor);
-            LibraryPort serviceUpdate = new LibraryPortService().getLibraryPortSoap11();
-            UpdateAuthorResponse afterUpdateResponse = serviceUpdate.updateAuthor(afterUpdateRequest);
-            AuthorType afterUpdate = afterUpdateResponse.getAuthor();
-
-            Assert.assertNull(beforeUpdate);
-            Assert.assertNull(afterUpdate);
-            Assert.assertNotEquals(beforeUpdate.getAuthorId(), afterUpdate.getAuthorId(), "Updated IDs are equal");
-            Assert.assertNotEquals(beforeUpdate.getBirth().getCity(), afterUpdate.getBirth().getCity(),
-                    "Updated Cities are equal");
-        } catch (ServerSOAPFaultException exp) {
-            System.out.println(exp.getMessage());
-        }
+        randomID = IdChecker.getAbsentAuthorId();
+        GetAuthorRequest beforeUpdateRequest = new GetAuthorRequest();
+        beforeUpdateRequest.setAuthorId(randomID);
+        GetAuthorResponse beforeUpdateResponse = service.getAuthor(beforeUpdateRequest);
+        AuthorType beforeUpdate = beforeUpdateResponse.getAuthor();
+        Assert.assertNull(beforeUpdate, "Id is already present");
     }
 
     @Test(groups = "positive")
